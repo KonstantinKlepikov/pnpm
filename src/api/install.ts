@@ -30,7 +30,7 @@ import {save as saveModules} from '../fs/modulesController'
 import removeOrphanPkgs from './removeOrphanPkgs'
 import mkdirp = require('mkdirp-promise')
 import createMemoize, {MemoizedFunc} from '../memoize'
-import {Package} from '../types'
+import {Package, PackagePlaceholder} from '../types'
 import {PackageSpec} from '../resolve'
 import depsToSpecs from '../depsToSpecs'
 
@@ -83,7 +83,7 @@ export async function install (maybeOpts?: PnpmOptions) {
 }
 
 function specsToInstallFromPackage(
-  pkg: Package,
+  pkg: PackagePlaceholder,
   opts: {
     production: boolean,
     prefix: string,
@@ -96,7 +96,7 @@ function specsToInstallFromPackage(
 }
 
 function depsToInstallFromPackage(
-  pkg: Package,
+  pkg: PackagePlaceholder,
   opts: {
     production: boolean
   }
@@ -231,11 +231,8 @@ async function installInContext (
       : [],
   })
 
-  let newPkg: Package | undefined = ctx.pkg
+  let newPkg: PackagePlaceholder = ctx.pkg
   if (installType === 'named') {
-    if (!ctx.pkg) {
-      throw new Error('Cannot save because no package.json found')
-    }
     const pkgJsonPath = path.join(ctx.root, 'package.json')
     const saveType = getSaveType(opts)
     newPkg = await save(

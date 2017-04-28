@@ -1,7 +1,7 @@
 import path = require('path')
 import R = require('ramda')
 import getContext from './getContext'
-import {PnpmOptions, Package} from '../types'
+import {PnpmOptions, Package, PackagePlaceholder} from '../types'
 import extendOptions from './extendOptions'
 import getPkgDirs from '../fs/getPkgDirs'
 import readPkg from '../fs/readPkg'
@@ -41,7 +41,7 @@ export async function prune(maybeOpts?: PnpmOptions): Promise<void> {
   {stale: opts.lockStaleDuration})
 }
 
-async function getExtraneousPkgs (pkg: Package, root: string, production: boolean) {
+async function getExtraneousPkgs (pkg: PackagePlaceholder, root: string, production: boolean) {
   const saveTypes = getSaveTypes(production)
   const savedDepsMap = saveTypes.reduce((allDeps, deps) => Object.assign({}, allDeps, pkg[deps]), {})
   const savedDeps = Object.keys(savedDepsMap)

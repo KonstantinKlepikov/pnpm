@@ -1,5 +1,5 @@
 import path = require('path')
-import {ignoreCache as readPkg} from '../fs/readPkg'
+import safeReadPkg from '../fs/safeReadPkg'
 import writePkg = require('write-pkg')
 import expandTilde, {isHomepath} from '../fs/expandTilde'
 import {StrictPnpmOptions} from '../types'
@@ -12,14 +12,14 @@ import {
   read as readModules,
 } from '../fs/modulesController'
 import mkdirp = require('mkdirp-promise')
-import {Package} from '../types'
+import {PackagePlaceholder} from '../types'
 import normalizePath = require('normalize-path')
 import removeAllExceptOuterLinks = require('remove-all-except-outer-links')
 import logger from 'pnpm-logger'
 import checkCompatibility from './checkCompatibility'
 
 export type PnpmContext = {
-  pkg?: Package,
+  pkg: PackagePlaceholder,
   storePath: string,
   root: string,
   privateShrinkwrap: Shrinkwrap,
@@ -28,7 +28,7 @@ export type PnpmContext = {
 }
 
 export default async function getContext (opts: StrictPnpmOptions, installType?: 'named' | 'general'): Promise<PnpmContext> {
-  const pkg = await (opts.global ? readGlobalPkg(opts.prefix) : readPkg(opts.prefix))
+  const pkg: PackagePlaceholder = await safeReadPkg(opts.prefix) || {}
   const root = normalizePath(opts.prefix)
   const storeBasePath = resolveStoreBasePath(opts.storePath, root)
 
@@ -63,27 +63,6 @@ export default async function getContext (opts: StrictPnpmOptions, installType?:
 
   await mkdirp(ctx.storePath)
   return ctx
-}
-
-async function readGlobalPkg (globalPath: string) {
-  const globalPkgPath = path.resolve(globalPath, 'package.json')
-  return await readGlobalPkgJson(globalPkgPath)
-}
-
-const DefaultGlobalPkg: Package = {
-  name: 'pnpm-global-pkg',
-  version: '1.0.0',
-  private: true,
-}
-
-async function readGlobalPkgJson (globalPkgPath: string) {
-  try {
-    const globalPkgJson = await readPkg(globalPkgPath)
-    return globalPkgJson
-  } catch (err) {
-    await writePkg(globalPkgPath, DefaultGlobalPkg)
-    return DefaultGlobalPkg
-  }
 }
 
 function resolveStoreBasePath (storePath: string, pkgRoot: string) {

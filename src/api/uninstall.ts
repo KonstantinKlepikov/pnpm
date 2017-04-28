@@ -5,7 +5,7 @@ import getSaveType from '../getSaveType'
 import removeDeps from '../removeDeps'
 import extendOptions from './extendOptions'
 import readPkg from '../fs/readPkg'
-import {PnpmOptions, StrictPnpmOptions, Package} from '../types'
+import {PnpmOptions, StrictPnpmOptions, Package, PackagePlaceholder} from '../types'
 import lock from './lock'
 import {
   Shrinkwrap,
@@ -39,7 +39,7 @@ export default async function uninstallCmd (pkgsToUninstall: string[], maybeOpts
   )
 }
 
-export async function uninstallInContext (pkgsToUninstall: string[], pkg: Package, ctx: PnpmContext, opts: StrictPnpmOptions) {
+export async function uninstallInContext (pkgsToUninstall: string[], pkg: PackagePlaceholder, ctx: PnpmContext, opts: StrictPnpmOptions) {
   const saveType = getSaveType(opts)
   if (saveType) {
     const pkgJsonPath = path.join(ctx.root, 'package.json')

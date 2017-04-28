@@ -111,9 +111,9 @@ export type Dependencies = {
 
 export type PackageBin = string | {[name: string]: string}
 
-export type Package = {
-  name: string,
-  version: string,
+export type PackagePlaceholder = {
+  name?: string,
+  version?: string,
   private?: boolean,
   bin?: PackageBin,
   directories?: {
@@ -129,4 +129,9 @@ export type Package = {
     [name: string]: string
   },
   config?: Object,
+}
+
+export type Package = PackagePlaceholder & {
+  name: string,
+  version: string,
 }
